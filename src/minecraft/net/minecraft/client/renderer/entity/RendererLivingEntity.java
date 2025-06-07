@@ -64,19 +64,19 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
      */
     protected float interpolateRotation(float par1, float par2, float par3)
     {
-        float f;
+        float yawOffsetInterpolated;
 
-        for (f = par2 - par1; f < -180.0F; f += 360.0F)
+        for (yawOffsetInterpolated = par2 - par1; yawOffsetInterpolated < -180.0F; yawOffsetInterpolated += 360.0F)
         {
             ;
         }
 
-        while (f >= 180.0F)
+        while (yawOffsetInterpolated >= 180.0F)
         {
-            f -= 360.0F;
+            yawOffsetInterpolated -= 360.0F;
         }
 
-        return par1 + par3 * f;
+        return par1 + par3 * yawOffsetInterpolated;
     }
 
     public void transformHeldFull3DItemLayer()
@@ -96,16 +96,16 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
 
         try
         {
-            float f = this.interpolateRotation(entity.prevRenderYawOffset, entity.renderYawOffset, partialTicks);
-            float f1 = this.interpolateRotation(entity.prevRotationYawHead, entity.rotationYawHead, partialTicks);
-            float f2 = f1 - f;
+            float yawOffsetInterpolated = this.interpolateRotation(entity.prevRenderYawOffset, entity.renderYawOffset, partialTicks);
+            float yawHeadInterpolated = this.interpolateRotation(entity.prevRotationYawHead, entity.rotationYawHead, partialTicks);
+            float _netHeadYaw = yawHeadInterpolated - yawOffsetInterpolated;
 
             if (entity.isRiding() && entity.ridingEntity instanceof EntityLivingBase)
             {
                 EntityLivingBase entitylivingbase = (EntityLivingBase)entity.ridingEntity;
-                f = this.interpolateRotation(entitylivingbase.prevRenderYawOffset, entitylivingbase.renderYawOffset, partialTicks);
-                f2 = f1 - f;
-                float f3 = MathHelper.wrapAngleTo180_float(f2);
+                yawOffsetInterpolated = this.interpolateRotation(entitylivingbase.prevRenderYawOffset, entitylivingbase.renderYawOffset, partialTicks);
+                _netHeadYaw = yawHeadInterpolated - yawOffsetInterpolated;
+                float f3 = MathHelper.wrapAngleTo180_float(_netHeadYaw);
 
                 if (f3 < -85.0F)
                 {
@@ -117,44 +117,44 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
                     f3 = 85.0F;
                 }
 
-                f = f1 - f3;
+                yawOffsetInterpolated = yawHeadInterpolated - f3;
 
                 if (f3 * f3 > 2500.0F)
                 {
-                    f += f3 * 0.2F;
+                    yawOffsetInterpolated += f3 * 0.2F;
                 }
             }
 
-            float f7 = entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * partialTicks;
+            float _headPitch = entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * partialTicks;
             this.renderLivingAt(entity, x, y, z);
-            float f8 = this.handleRotationFloat(entity, partialTicks);
-            this.rotateCorpse(entity, f8, f, partialTicks);
+            float _ageInTicks = this.handleRotationFloat(entity, partialTicks);
+            this.rotateCorpse(entity, _ageInTicks, yawOffsetInterpolated, partialTicks);
             GlStateManager.enableRescaleNormal();
             GlStateManager.scale(-1.0F, -1.0F, 1.0F);
             this.preRenderCallback(entity, partialTicks);
             float f4 = 0.0625F;
             GlStateManager.translate(0.0F, -1.5078125F, 0.0F);
-            float f5 = entity.prevLimbSwingAmount + (entity.limbSwingAmount - entity.prevLimbSwingAmount) * partialTicks;
-            float f6 = entity.limbSwing - entity.limbSwingAmount * (1.0F - partialTicks);
+            float _limbSwingAmount = entity.prevLimbSwingAmount + (entity.limbSwingAmount - entity.prevLimbSwingAmount) * partialTicks;
+            float _limbSwing = entity.limbSwing - entity.limbSwingAmount * (1.0F - partialTicks);
 
             if (entity.isChild())
             {
-                f6 *= 3.0F;
+                _limbSwing *= 3.0F;
             }
 
-            if (f5 > 1.0F)
+            if (_limbSwingAmount > 1.0F)
             {
-                f5 = 1.0F;
+                _limbSwingAmount = 1.0F;
             }
 
             GlStateManager.enableAlpha();
-            this.mainModel.setLivingAnimations(entity, f6, f5, partialTicks);
-            this.mainModel.setRotationAngles(f6, f5, f8, f2, f7, 0.0625F, entity);
+            this.mainModel.setLivingAnimations(entity, _limbSwing, _limbSwingAmount, partialTicks);
+            this.mainModel.setRotationAngles(_limbSwing, _limbSwingAmount, _ageInTicks, _netHeadYaw, _headPitch, 0.0625F, entity);
 
             if (this.renderOutlines)
             {
                 boolean flag1 = this.setScoreTeamColor(entity);
-                this.renderModel(entity, f6, f5, f8, f2, f7, 0.0625F);
+                this.renderModel(entity, _limbSwing, _limbSwingAmount, _ageInTicks, _netHeadYaw, _headPitch, 0.0625F);
 
                 if (flag1)
                 {
@@ -164,7 +164,7 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
             else
             {
                 boolean flag = this.setDoRenderBrightness(entity, partialTicks);
-                this.renderModel(entity, f6, f5, f8, f2, f7, 0.0625F);
+                this.renderModel(entity, _limbSwing, _limbSwingAmount, _ageInTicks, _netHeadYaw, _headPitch, 0.0625F);
 
                 if (flag)
                 {
@@ -175,7 +175,7 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
 
                 if (!(entity instanceof EntityPlayer) || !((EntityPlayer)entity).isSpectator())
                 {
-                    this.renderLayers(entity, f6, f5, partialTicks, f8, f2, f7, 0.0625F);
+                    this.renderLayers(entity, _limbSwing, _limbSwingAmount, partialTicks, _ageInTicks, _netHeadYaw, _headPitch, 0.0625F);
                 }
             }
 
@@ -217,12 +217,12 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
             }
         }
 
-        float f1 = (float)(i >> 16 & 255) / 255.0F;
-        float f2 = (float)(i >> 8 & 255) / 255.0F;
-        float f = (float)(i & 255) / 255.0F;
+        float yawHeadInterpolated = (float)(i >> 16 & 255) / 255.0F;
+        float _netHeadYaw = (float)(i >> 8 & 255) / 255.0F;
+        float yawOffsetInterpolated = (float)(i & 255) / 255.0F;
         GlStateManager.disableLighting();
         GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
-        GlStateManager.color(f1, f2, f, 1.0F);
+        GlStateManager.color(yawHeadInterpolated, _netHeadYaw, yawOffsetInterpolated, 1.0F);
         GlStateManager.disableTexture2D();
         GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
         GlStateManager.disableTexture2D();
@@ -284,8 +284,8 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
 
     protected boolean setBrightness(T entitylivingbaseIn, float partialTicks, boolean combineTextures)
     {
-        float f = entitylivingbaseIn.getBrightness(partialTicks);
-        int i = this.getColorMultiplier(entitylivingbaseIn, f, partialTicks);
+        float yawOffsetInterpolated = entitylivingbaseIn.getBrightness(partialTicks);
+        int i = this.getColorMultiplier(entitylivingbaseIn, yawOffsetInterpolated, partialTicks);
         boolean flag = (i >> 24 & 255) > 0;
         boolean flag1 = entitylivingbaseIn.hurtTime > 0 || entitylivingbaseIn.deathTime > 0;
 
@@ -334,14 +334,14 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
             }
             else
             {
-                float f1 = (float)(i >> 24 & 255) / 255.0F;
-                float f2 = (float)(i >> 16 & 255) / 255.0F;
+                float yawHeadInterpolated = (float)(i >> 24 & 255) / 255.0F;
+                float _netHeadYaw = (float)(i >> 16 & 255) / 255.0F;
                 float f3 = (float)(i >> 8 & 255) / 255.0F;
                 float f4 = (float)(i & 255) / 255.0F;
-                this.brightnessBuffer.put(f2);
+                this.brightnessBuffer.put(_netHeadYaw);
                 this.brightnessBuffer.put(f3);
                 this.brightnessBuffer.put(f4);
-                this.brightnessBuffer.put(1.0F - f1);
+                this.brightnessBuffer.put(1.0F - yawHeadInterpolated);
             }
 
             this.brightnessBuffer.flip();
@@ -418,15 +418,15 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
 
         if (bat.deathTime > 0)
         {
-            float f = ((float)bat.deathTime + partialTicks - 1.0F) / 20.0F * 1.6F;
-            f = MathHelper.sqrt_float(f);
+            float yawOffsetInterpolated = ((float)bat.deathTime + partialTicks - 1.0F) / 20.0F * 1.6F;
+            yawOffsetInterpolated = MathHelper.sqrt_float(yawOffsetInterpolated);
 
-            if (f > 1.0F)
+            if (yawOffsetInterpolated > 1.0F)
             {
-                f = 1.0F;
+                yawOffsetInterpolated = 1.0F;
             }
 
-            GlStateManager.rotate(f * this.getDeathMaxRotation(bat), 0.0F, 0.0F, 1.0F);
+            GlStateManager.rotate(yawOffsetInterpolated * this.getDeathMaxRotation(bat), 0.0F, 0.0F, 1.0F);
         }
         else
         {
@@ -496,12 +496,12 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
         if (this.canRenderName(entity))
         {
             double d0 = entity.getDistanceSqToEntity(this.renderManager.livingPlayer);
-            float f = entity.isSneaking() ? 32.0F : 64.0F;
+            float yawOffsetInterpolated = entity.isSneaking() ? 32.0F : 64.0F;
 
-            if (d0 < (double)(f * f))
+            if (d0 < (double)(yawOffsetInterpolated * yawOffsetInterpolated))
             {
                 String s = entity.getDisplayName().getFormattedText();
-                float f1 = 0.02666667F;
+                float yawHeadInterpolated = 0.02666667F;
                 GlStateManager.alphaFunc(516, 0.1F);
 
                 if (entity.isSneaking())

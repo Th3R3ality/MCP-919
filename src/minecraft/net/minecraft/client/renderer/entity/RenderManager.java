@@ -316,10 +316,10 @@ public class RenderManager
             entity.lastTickPosZ = entity.posZ;
         }
 
-        double d0 = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * (double)partialTicks;
-        double d1 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * (double)partialTicks;
-        double d2 = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * (double)partialTicks;
-        float f = entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * partialTicks;
+        double xInterpolated = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * (double)partialTicks;
+        double yInterpolated = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * (double)partialTicks;
+        double zInterpolated = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * (double)partialTicks;
+        float yawInterpolated = entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * partialTicks;
         int i = entity.getBrightnessForRender(partialTicks);
 
         if (entity.isBurning())
@@ -331,14 +331,14 @@ public class RenderManager
         int k = i / 65536;
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j / 1.0F, (float)k / 1.0F);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        return this.doRenderEntity(entity, d0 - this.renderPosX, d1 - this.renderPosY, d2 - this.renderPosZ, f, partialTicks, hideDebugBox);
+        return this.doRenderEntity(entity, xInterpolated - this.renderPosX, yInterpolated - this.renderPosY, zInterpolated - this.renderPosZ, yawInterpolated, partialTicks, hideDebugBox);
     }
 
     public void renderWitherSkull(Entity entityIn, float partialTicks)
     {
-        double d0 = entityIn.lastTickPosX + (entityIn.posX - entityIn.lastTickPosX) * (double)partialTicks;
-        double d1 = entityIn.lastTickPosY + (entityIn.posY - entityIn.lastTickPosY) * (double)partialTicks;
-        double d2 = entityIn.lastTickPosZ + (entityIn.posZ - entityIn.lastTickPosZ) * (double)partialTicks;
+        double xInterpolated = entityIn.lastTickPosX + (entityIn.posX - entityIn.lastTickPosX) * (double)partialTicks;
+        double yInterpolated = entityIn.lastTickPosY + (entityIn.posY - entityIn.lastTickPosY) * (double)partialTicks;
+        double zInterpolated = entityIn.lastTickPosZ + (entityIn.posZ - entityIn.lastTickPosZ) * (double)partialTicks;
         Render<Entity> render = this.<Entity>getEntityRenderObject(entityIn);
 
         if (render != null && this.renderEngine != null)
@@ -348,7 +348,7 @@ public class RenderManager
             int k = i / 65536;
             OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j / 1.0F, (float)k / 1.0F);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            render.renderName(entityIn, d0 - this.renderPosX, d1 - this.renderPosY, d2 - this.renderPosZ);
+            render.renderName(entityIn, xInterpolated - this.renderPosX, yInterpolated - this.renderPosY, zInterpolated - this.renderPosZ);
         }
     }
 
@@ -442,7 +442,7 @@ public class RenderManager
         GlStateManager.disableLighting();
         GlStateManager.disableCull();
         GlStateManager.disableBlend();
-        float f = entityIn.width / 2.0F;
+        float yawInterpolated = entityIn.width / 2.0F;
         AxisAlignedBB axisalignedbb = entityIn.getEntityBoundingBox();
         AxisAlignedBB axisalignedbb1 = new AxisAlignedBB(axisalignedbb.minX - entityIn.posX + x, axisalignedbb.minY - entityIn.posY + y, axisalignedbb.minZ - entityIn.posZ + z, axisalignedbb.maxX - entityIn.posX + x, axisalignedbb.maxY - entityIn.posY + y, axisalignedbb.maxZ - entityIn.posZ + z);
         RenderGlobal.drawOutlinedBoundingBox(axisalignedbb1, 255, 255, 255, 255);
@@ -450,7 +450,7 @@ public class RenderManager
         if (entityIn instanceof EntityLivingBase)
         {
             float f1 = 0.01F;
-            RenderGlobal.drawOutlinedBoundingBox(new AxisAlignedBB(x - (double)f, y + (double)entityIn.getEyeHeight() - 0.009999999776482582D, z - (double)f, x + (double)f, y + (double)entityIn.getEyeHeight() + 0.009999999776482582D, z + (double)f), 255, 0, 0, 255);
+            RenderGlobal.drawOutlinedBoundingBox(new AxisAlignedBB(x - (double)yawInterpolated, y + (double)entityIn.getEyeHeight() - 0.009999999776482582D, z - (double)yawInterpolated, x + (double)yawInterpolated, y + (double)entityIn.getEyeHeight() + 0.009999999776482582D, z + (double)yawInterpolated), 255, 0, 0, 255);
         }
 
         Tessellator tessellator = Tessellator.getInstance();
@@ -477,10 +477,10 @@ public class RenderManager
 
     public double getDistanceToCamera(double x, double y, double z)
     {
-        double d0 = x - this.viewerPosX;
-        double d1 = y - this.viewerPosY;
-        double d2 = z - this.viewerPosZ;
-        return d0 * d0 + d1 * d1 + d2 * d2;
+        double xInterpolated = x - this.viewerPosX;
+        double yInterpolated = y - this.viewerPosY;
+        double zInterpolated = z - this.viewerPosZ;
+        return xInterpolated * xInterpolated + yInterpolated * yInterpolated + zInterpolated * zInterpolated;
     }
 
     /**
