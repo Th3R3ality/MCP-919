@@ -126,13 +126,13 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
             }
 
             float _headPitch = entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * partialTicks;
-            this.renderLivingAt(entity, x, y, z);
+            this.renderLivingAt(entity, x, y, z); // GlStateManager.translate((float)x, (float)y, (float)z);
             float _ageInTicks = this.handleRotationFloat(entity, partialTicks);
             this.rotateCorpse(entity, _ageInTicks, yawOffsetInterpolated, partialTicks);
             GlStateManager.enableRescaleNormal();
             GlStateManager.scale(-1.0F, -1.0F, 1.0F);
             this.preRenderCallback(entity, partialTicks);
-            float f4 = 0.0625F;
+            float sixteenth = 0.0625F;
             GlStateManager.translate(0.0F, -1.5078125F, 0.0F);
             float _limbSwingAmount = entity.prevLimbSwingAmount + (entity.limbSwingAmount - entity.prevLimbSwingAmount) * partialTicks;
             float _limbSwing = entity.limbSwing - entity.limbSwingAmount * (1.0F - partialTicks);
@@ -337,10 +337,10 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
                 float yawHeadInterpolated = (float)(i >> 24 & 255) / 255.0F;
                 float _netHeadYaw = (float)(i >> 16 & 255) / 255.0F;
                 float f3 = (float)(i >> 8 & 255) / 255.0F;
-                float f4 = (float)(i & 255) / 255.0F;
+                float sixteenth = (float)(i & 255) / 255.0F;
                 this.brightnessBuffer.put(_netHeadYaw);
                 this.brightnessBuffer.put(f3);
-                this.brightnessBuffer.put(f4);
+                this.brightnessBuffer.put(sixteenth);
                 this.brightnessBuffer.put(1.0F - yawHeadInterpolated);
             }
 
